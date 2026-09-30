@@ -34,3 +34,4 @@
 .pio/
 .vscode/
 include/secrets.h
+/docs/

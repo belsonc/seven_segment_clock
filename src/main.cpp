@@ -6,6 +6,7 @@
 #include <lvgl.h>
 #include "touch.h"
 #include "secrets.h"
+#include <WiFi.h>
 
 bool wifi_success = false;
 
@@ -21,7 +22,9 @@ const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = -18000; 
 const int   daylightOffset_sec = 3600; // 1 hour for Daylight Saving Time
 int hour, minute, second;
-int hour_color, minute_color, second_color;
+
+int hour_color, minute_color;//, second_color;
+int ten_minute_color;
 String hour_str, minute_str, second_str, time_str;
 lv_color_t text_color = lv_color_hex(0x810226);
 struct tm timeinfo, previous_time;
@@ -280,6 +283,30 @@ void relay_gui(void)
   */
 }
 
+struct tm time_update()
+{
+/*    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo))
+    {
+        Serial.println("Failed to obtain time");
+        return timeinfo; // Return an empty struct
+    }
+*/
+    struct tm timeinfo = {};
+    do {
+        if (!getLocalTime(&timeinfo)) {
+            Serial.println("Failed to obtain time");
+            delay(1000); // Wait for a second before retrying
+        }
+        else {
+            Serial.println("Time obtained successfully!");
+            break;
+        }
+    } while (1); // Continue until we have a valid time
+    return timeinfo;
+}
+
+
 void setup()
 {
   Serial.begin(115200);
@@ -344,6 +371,45 @@ void setup()
   lv_display_set_buffers(disp, draw_buf, NULL, sizeof(draw_buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
   lv_display_set_rotation(disp, TFT_ROTATION);
 
+    Serial.println("\nConnecting to Wi-Fi...");
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+    unsigned long start_time = millis();
+
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+
+        if (millis() - start_time >= 10000) {
+            break;
+        }
+    }
+
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("\nWi-Fi failed. Trying hotspot...");
+
+        WiFi.begin(HOTSPOT_SSID, HOTSPOT_PASSWORD);
+
+        // wait for hotspot...
+    }
+
+    Serial.println("\nWi-Fi Connected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+
+    // Initialize NTP
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    Serial.println("NTP Initialized!");
+    struct tm timeinfo;
+    timeinfo = time_update();
+    Serial.println(&timeinfo);
+/*    if(!getLocalTime(&timeinfo))
+    {
+        Serial.println("Failed to obtain time");
+        return;
+    }
+
+*/
 #if 1
   // Set default theme
   lv_obj_set_style_bg_color(lv_screen_active(),lv_color_hex(0x000000),LV_PART_MAIN);
@@ -352,6 +418,17 @@ void setup()
   lv_theme_t * theme = lv_theme_default_init(NULL, color_primary, color_secondary, LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
   lv_disp_set_theme(disp, theme);
 #endif
+
+  hour = timeinfo.tm_hour;
+  minute = timeinfo.tm_min;
+  second = timeinfo.tm_sec;
+
+  hour_color = hour * 256 / 24; // Scale hour to 0-255
+  minute_color = minute * 256 / 60; // Scale minute to 0-255
+//  second_color = second * 256 / 60; // Scale second to 0-255
+  Serial.println("Got RGB");
+
+
 
   // Initialize touch input
   lv_indev_t *indev = lv_indev_create();

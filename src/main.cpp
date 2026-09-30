@@ -36,6 +36,25 @@ uint32_t draw_buf[DRAW_BUF_SIZE / 4];
 #define GPIO_RELAY2  2
 #define GPIO_RELAY3  1
 
+
+bool digit_format[10][7] = {{true, true, true, false, true, true, true}, //0
+                            {false, false, true, false, false, true, false}, //1
+                            {true, false, true, true, true, false, true}, //2
+                            {true, false, true, true, false, true, true}, //3
+                            {false, true, true, true, false, true, false}, //4
+                            {true, true, false, true, false, true, true}, //5
+                            {true, true, false, true, true, true, true}, //6
+                            {true, false, true, false, false, true, false}, //7
+                            {true, true, true, true, true, true, true}, //8
+                            {true, true, true, true, false, true, true}}; //9
+
+lv_obj_t *digits[4][7];  //there's 4 digits being displayed on the screen, 7 segments each
+
+
+
+int x_coords[7] = {0, 0, 80, 0, 0, 80, 0};
+int y_coords[7] = {20, 45, 45, 220, 245, 245, 420};
+
 // Display flushing callback for LVGL
 void my_disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
 {
@@ -131,8 +150,78 @@ static void event_handler_relay3(lv_event_t *e)
 // Create GUI with three relay control buttons
 void relay_gui(void)
 {
-  lv_obj_t *label;
+  int horiz_length = 90;
+  int horiz_depth = 20;
+  int vert_length = 20;
+  int vert_depth = 170;
 
+
+
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 7; j++) {
+      digits[i][j] = lv_obj_create(lv_screen_active());
+//      lv_obj_set_size(digits[i][j], 20, 100); // Set size for each segment
+/*      if (j < 3) {
+        lv_obj_set_size(digits[i][j], horiz_length, horiz_depth); // Horizontal segments
+      } else {
+        lv_obj_set_size(digits[i][j], vert_length, vert_depth); // Vertical segments
+      }
+*/
+      if (j == 0 || j == 3 || j == 6) { //horizontal segments
+          lv_obj_set_size(digits[i][j], horiz_length, horiz_depth);
+      } else { //vertical segments
+          lv_obj_set_size(digits[i][j], vert_length, vert_depth);
+      }
+      // lv_obj_set_pos(one_hour_right_bottom,200,245);
+
+
+      if (j == 0 || j == 3 || j == 6) { //horizontal segments
+          lv_obj_set_pos(digits[i][j], x_coords[j] + 25 + (i * 110), y_coords[j]);
+      } else { //vertical segments
+          lv_obj_set_pos(digits[i][j], x_coords[j] + 20 + (i * 110), y_coords[j]);
+      }
+
+//      lv_obj_set_pos(digits[i][j], x_coords[j] + 20 + (i * 110), y_coords[j]);
+      lv_obj_set_scrollbar_mode(digits[i][j], LV_SCROLLBAR_MODE_OFF);
+      lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN); // Default off color
+      lv_obj_set_style_border_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN);
+    }
+  }
+
+    for (int i = 0; i < 4; i++) {  //screen position
+        for (int j = 0; j < 7; j++) {  //segments
+            if (digit_format[i+5][j]) { 
+                lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x987654), LV_PART_MAIN); // On color
+            } else {
+                lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN); // Off color
+            }
+        }
+    }
+
+    int num_to_draw;
+    for (int i=0; i<4; i++) {
+      if (i == 0) {
+        num_to_draw = 2;
+      }
+      else if (i == 1) {
+        num_to_draw = 8;
+      }
+      else if (i == 2) {
+        num_to_draw = 5;
+      }
+      else {
+        num_to_draw = 7;
+      }
+      for (int j = 0; j<7; j++) {
+        if(digit_format[num_to_draw][j]) {
+            lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x344378), LV_PART_MAIN); //on color
+        } else {
+            lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN); //off color
+        }
+      }
+    }
+
+/*
   // Create relay 1 button
   lv_obj_t *btn1 = lv_button_create(lv_screen_active());
   lv_obj_add_event_cb(btn1, event_handler_relay1, LV_EVENT_ALL, NULL);
@@ -165,6 +254,8 @@ void relay_gui(void)
   lv_obj_set_style_text_font(label, &lv_font_montserrat_48, 0);
   lv_label_set_text(label, "Relay 3");
   lv_obj_center(label);
+
+  */
 }
 
 void setup()
@@ -231,10 +322,11 @@ void setup()
   lv_display_set_buffers(disp, draw_buf, NULL, sizeof(draw_buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
   lv_display_set_rotation(disp, TFT_ROTATION);
 
-#if 0
+#if 1
   // Set default theme
-  lv_color_t color_primary = lv_palette_main(LV_PALETTE_BLUE);
-  lv_color_t color_secondary = lv_palette_main(LV_PALETTE_RED);
+  lv_obj_set_style_bg_color(lv_screen_active(),lv_color_hex(0x000000),LV_PART_MAIN);
+  lv_color_t color_primary = lv_color_hex(0x022681); //lv_palette_main(LV_PALETTE_BLUE);
+  lv_color_t color_secondary = lv_color_hex(0xCAB226); //lv_palette_main(LV_PALETTE_RED);
   lv_theme_t * theme = lv_theme_default_init(NULL, color_primary, color_secondary, LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
   lv_disp_set_theme(disp, theme);
 #endif

@@ -5,6 +5,28 @@
 #include <ESP32_4848S040.h>
 #include <lvgl.h>
 #include "touch.h"
+#include "secrets.h"
+
+bool wifi_success = false;
+
+//wifi connection info
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD; 
+const char* hotspot_ssid = HOTSPOT_SSID;
+const char* hotspot_password = HOTSPOT_PASSWORD; //ssids and passwords come from secrets.h 
+
+// NTP Server Settings
+const char* ntpServer = "pool.ntp.org";
+// Time zone offsets in seconds (e.g., Eastern Time: -5 hours * 3600 = -18000)
+const long  gmtOffset_sec = -18000; 
+const int   daylightOffset_sec = 3600; // 1 hour for Daylight Saving Time
+int hour, minute, second;
+int hour_color, minute_color, second_color;
+String hour_str, minute_str, second_str, time_str;
+lv_color_t text_color = lv_color_hex(0x810226);
+struct tm timeinfo, previous_time;
+int current_millis, previous_millis;
+
 
 // Display backlight pin
 #define GFX_BL 38

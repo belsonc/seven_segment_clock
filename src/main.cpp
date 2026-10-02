@@ -22,7 +22,7 @@ const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = -18000; 
 const int   daylightOffset_sec = 3600; // 1 hour for Daylight Saving Time
 int hour, minute, second;
-
+int ten_hour, ten_minute;
 int hour_color, minute_color;//, second_color;
 int ten_minute_color;
 String hour_str, minute_str, second_str, time_str;
@@ -172,6 +172,32 @@ static void event_handler_relay3(lv_event_t *e)
   process_relay_action(e, 3);
 }
 
+
+struct tm time_update()
+{
+/*    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo))
+    {
+        Serial.println("Failed to obtain time");
+        return timeinfo; // Return an empty struct
+    }
+*/
+    struct tm timeinfo = {};
+    do {
+        if (!getLocalTime(&timeinfo)) {
+            Serial.println("Failed to obtain time");
+            delay(1000); // Wait for a second before retrying
+        }
+        else {
+            Serial.println("Time obtained successfully!");
+            break;
+        }
+    } while (1); // Continue until we have a valid time
+    return timeinfo;
+}
+
+
+
 // Create GUI with three relay control buttons
 void relay_gui(void)
 {
@@ -179,8 +205,12 @@ void relay_gui(void)
   int horiz_depth = 20;
   int vert_length = 20;
   int vert_depth = 170;
+  timeinfo = time_update();
 
-
+  ten_hour = timeinfo.tm_hour / 10;
+  hour = timeinfo.tm_hour % 10;
+  ten_minute = timeinfo.tm_min / 10;
+  minute = timeinfo.tm_min % 10;
 
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 7; j++) {
@@ -226,16 +256,16 @@ void relay_gui(void)
     int num_to_draw;
     for (int i=0; i<4; i++) {
       if (i == 0) {
-        num_to_draw = 2;
+        num_to_draw = ten_hour;
       }
       else if (i == 1) {
-        num_to_draw = 8;
+        num_to_draw = hour;
       }
       else if (i == 2) {
-        num_to_draw = 5;
+        num_to_draw = ten_minute;
       }
       else {
-        num_to_draw = 7;
+        num_to_draw = minute;
       }
       for (int j = 0; j<7; j++) {
         if(digit_format[num_to_draw][j]) {
@@ -282,16 +312,16 @@ void relay_gui(void)
 
   */
 }
-
+/*
 struct tm time_update()
 {
-/*    struct tm timeinfo;
+    struct tm timeinfo;
     if (!getLocalTime(&timeinfo))
     {
         Serial.println("Failed to obtain time");
         return timeinfo; // Return an empty struct
     }
-*/
+
     struct tm timeinfo = {};
     do {
         if (!getLocalTime(&timeinfo)) {
@@ -305,7 +335,7 @@ struct tm time_update()
     } while (1); // Continue until we have a valid time
     return timeinfo;
 }
-
+*/
 
 void setup()
 {

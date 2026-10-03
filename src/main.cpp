@@ -474,4 +474,87 @@ void loop()
   // Let LVGL handle GUI tasks
   lv_timer_handler();
   delay(5);
+  int horiz_length = 90;
+  int horiz_depth = 20;
+  int vert_length = 20;
+  int vert_depth = 170;
+
+  current_millis = millis();
+  if (current_millis - previous_millis >= 60000) { //then a minute has passed
+    timeinfo = time_update();
+  ten_hour = timeinfo.tm_hour / 10;
+  hour = timeinfo.tm_hour % 10;
+  ten_minute = timeinfo.tm_min / 10;
+  minute = timeinfo.tm_min % 10;
+
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 7; j++) {
+      digits[i][j] = lv_obj_create(lv_screen_active());
+//      lv_obj_set_size(digits[i][j], 20, 100); // Set size for each segment
+/*      if (j < 3) {
+        lv_obj_set_size(digits[i][j], horiz_length, horiz_depth); // Horizontal segments
+      } else {
+        lv_obj_set_size(digits[i][j], vert_length, vert_depth); // Vertical segments
+      }
+*/
+      if (j == 0 || j == 3 || j == 6) { //horizontal segments
+          lv_obj_set_size(digits[i][j], horiz_length, horiz_depth);
+      } else { //vertical segments
+          lv_obj_set_size(digits[i][j], vert_length, vert_depth);
+      }
+      // lv_obj_set_pos(one_hour_right_bottom,200,245);
+
+
+      if (j == 0 || j == 3 || j == 6) { //horizontal segments
+          lv_obj_set_pos(digits[i][j], x_coords[j] + 25 + (i * 110), y_coords[j]);
+      } else { //vertical segments
+          lv_obj_set_pos(digits[i][j], x_coords[j] + 20 + (i * 110), y_coords[j]);
+      }
+
+//      lv_obj_set_pos(digits[i][j], x_coords[j] + 20 + (i * 110), y_coords[j]);
+      lv_obj_set_scrollbar_mode(digits[i][j], LV_SCROLLBAR_MODE_OFF);
+      lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN); // Default off color
+      lv_obj_set_style_border_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN);
+    }
+  }
+
+    for (int i = 0; i < 4; i++) {  //screen position
+        for (int j = 0; j < 7; j++) {  //segments
+            if (digit_format[i+5][j]) { 
+                lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x987654), LV_PART_MAIN); // On color
+            } else {
+                lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN); // Off color
+            }
+        }
+    }
+
+    int num_to_draw;
+    for (int i=0; i<4; i++) {
+      if (i == 0) {
+        num_to_draw = ten_hour;
+      }
+      else if (i == 1) {
+        num_to_draw = hour;
+      }
+      else if (i == 2) {
+        num_to_draw = ten_minute;
+      }
+      else {
+        num_to_draw = minute;
+      }
+      for (int j = 0; j<7; j++) {
+        if(digit_format[num_to_draw][j]) {
+            lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x344378), LV_PART_MAIN); //on color
+        } else {
+            lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN); //off color
+        }
+      }
+    }
+
+
+
+    previous_time = timeinfo;
+    previous_millis = current_millis;
+   
+  }
 }

@@ -489,7 +489,7 @@ void loop()
 
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 7; j++) {
-      digits[i][j] = lv_obj_create(lv_screen_active());
+    //  digits[i][j] = lv_obj_create(lv_screen_active()); already done in relay_gui, don't need to recreate the wheel
 //      lv_obj_set_size(digits[i][j], 20, 100); // Set size for each segment
 /*      if (j < 3) {
         lv_obj_set_size(digits[i][j], horiz_length, horiz_depth); // Horizontal segments

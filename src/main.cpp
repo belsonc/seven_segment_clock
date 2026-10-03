@@ -269,7 +269,7 @@ void relay_gui(void)
       }
       for (int j = 0; j<7; j++) {
         if(digit_format[num_to_draw][j]) {
-            lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x344378), LV_PART_MAIN); //on color
+            lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0xFF0000), LV_PART_MAIN); //on color //0x344378
         } else {
             lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN); //off color
         }
@@ -443,7 +443,7 @@ void setup()
 #if 1
   // Set default theme
   lv_obj_set_style_bg_color(lv_screen_active(),lv_color_hex(0x000000),LV_PART_MAIN);
-  lv_color_t color_primary = lv_color_hex(0x022681); //lv_palette_main(LV_PALETTE_BLUE);
+  lv_color_t color_primary = lv_color_hex(0xFF0000); //lv_palette_main(LV_PALETTE_BLUE);
   lv_color_t color_secondary = lv_color_hex(0xCAB226); //lv_palette_main(LV_PALETTE_RED);
   lv_theme_t * theme = lv_theme_default_init(NULL, color_primary, color_secondary, LV_THEME_DEFAULT_DARK, LV_FONT_DEFAULT);
   lv_disp_set_theme(disp, theme);
@@ -544,7 +544,7 @@ void loop()
       }
       for (int j = 0; j<7; j++) {
         if(digit_format[num_to_draw][j]) {
-            lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x344378), LV_PART_MAIN); //on color
+            lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0xFF0000), LV_PART_MAIN); //on color
         } else {
             lv_obj_set_style_bg_color(digits[i][j], lv_color_hex(0x000000), LV_PART_MAIN); //off color
         }
